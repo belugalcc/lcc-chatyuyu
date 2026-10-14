@@ -1,0 +1,24 @@
+{
+  "name": "lcc-chatyuyu",
+  "version": "1.0.0",
+  "private": true,
+  "description": "lcc-chat — Cloudflare Worker backend (Durable Objects, KV, WebSockets)",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787 --ip 0.0.0.0",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "kv:create": "wrangler kv namespace create PROFILES",
+    "test": "node test/run.mjs",
+    "test:browser": "node test/run.mjs --browser"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "playwright-core": "1.49.1",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.151.0"
+  }
+}

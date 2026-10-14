@@ -1,0 +1,63 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "lcc-chatyuyu"
+main = "src/index.ts"
+compatibility_date = "2026-04-07"
+
+# ---------------------------------------------------------------- Durable Objects
+# One DO instance per conversation (DM or group) + one per user session hub
+# + a single global presence registry.
+[[durable_objects.bindings]]
+name = "CHAT_ROOM"
+class_name = "ChatRoom"
+
+[[durable_objects.bindings]]
+name = "USER_SESSION"
+class_name = "UserSession"
+
+[[durable_objects.bindings]]
+name = "PRESENCE"
+class_name = "Presence"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoom", "UserSession", "Presence"]
+
+# ---------------------------------------------------------------- Workers KV
+# Profiles, display names, avatars, conversation lists, feature flags,
+# cached media (PeerJS/TURN) configuration. Never used for live messages.
+# Create with:  wrangler kv namespace create PROFILES
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "PROFILES"
+# Local development (`pnpm dev`) works with this placeholder as-is.
+# For a real deployment create one namespace and replace the id:
+#   pnpm --filter lcc-chat-server kv:create
+id = "3250b62088f34fc08eb987fc051197b6"
+
+# ---------------------------------------------------------------- Vars
+# Everything below is optional: lcc-chat runs with no API keys and no secrets.
+[vars]
+# Optional. Signs session tokens. When empty the Worker generates a secret per
+# isolate, so sessions reset on restart. Set it for a stable deployment with:
+#   wrangler secret put TOKEN_SECRET
+TOKEN_SECRET = "h"
+
+# WebRTC ICE. STUN works out of the box; TURN is only needed when direct peer
+# connections fail. If you add one, keep it in secrets (never in /client) —
+# authenticated browsers fetch it from `/api/media/config`:
+#   wrangler secret put TURN_URL
+#   wrangler secret put TURN_USERNAME
+#   wrangler secret put TURN_CREDENTIAL
+STUN_URLS = "stun:stun.l.google.com:19302"
+
+# PeerJS signalling. Empty PEER_HOST uses the free public PeerJS Cloud, which is
+# fine for development and small groups. For production self-host PeerServer and
+# set PEER_HOST / PEER_PORT / PEER_PATH / PEER_SECURE.
+PEER_HOST = "h"
+PEER_PORT = "443"
+PEER_PATH = "/"
+PEER_SECURE = "true"
+
+# Abuse limits (per user, best effort).
+MAX_MESSAGE_LENGTH = "4000"
+MESSAGES_PER_MINUTE = "60"
